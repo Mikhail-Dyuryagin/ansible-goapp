@@ -1,0 +1,78 @@
+---
+- hosts: all
+  tasks:
+      
+  - name: Add nginx repository
+    apt_repository: repo='ppa:nginx/stable'
+
+  - name: Install utility packages
+    apt:
+      name:
+        - nginx
+        - golang-go
+        - php-fpm
+        - curl
+        - letsencrypt
+      state: present
+      autoclean: yes
+   
+  - name: ADD GOPATH
+    shell: export GOPATH=/opt/src/goapp
+
+  - name: Install goapp
+    template:
+      src: templates/back/goapp
+      dest: /opt/src/goapp
+
+  - name: Install diff
+    template:
+      src: templates/back/diff.php        
+      dest: /opt/src/diff.php
+
+  - name: add goapp systemd
+    apt_reposit: 
+
+  - name: Install index.html
+    template:
+      src: templates/front/index.html
+      dest: /var/www/denergym.devops.srwx.net/index.html
+
+  - name: Install app.jg 
+    template:
+      src: templates/front/app.js
+      dest: /var/www/denergym.devops.srwx.net/app.js
+
+
+  - name: Kick default site
+    file: 
+      path: /etc/nginx/sites-enabled/default
+      state: absent 
+
+  - name: Install nginx config
+    template:
+      src: templates/conf/nginx.conf.j2
+      dest: /etc/nginx/nginx.conf
+
+  - name: create letsencrypt dir
+    file: name=/opt/src/ssl state=directory
+
+  - name: Location for letsencrypt
+    template:
+      src: templates/conf/nginx-lets.j2
+      dest: /etc/nginx/lets
+    
+  - name: Create cert letsencrypt
+    shell: letsencrypt certonly -n --webroot -w /opt/src/ssl -m {{ letsencrypt_email}} --agree-tos -d {{domain_name}}
+    args:
+      creates: /etc/letsencrypt/live/{{ domain_name }}
+  
+  - name: Location https
+    template:
+      src: templates/conf/http-ssl.j2
+      dest: /etc/nginx/http-ssl
+
+  - name: Cronjob  for letsencrypt
+    cron:
+      name: letsencrypt_renew
+      special_time: weekly      
+      job: letsencrypt --renew certonly -n --webroot -w /opt/src/ssl -m {{ letsencrypt_email  }} --agree-tos -d {{domain_name}}
