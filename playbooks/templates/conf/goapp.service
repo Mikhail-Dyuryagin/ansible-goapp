@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/opt/src/goapp/goapp
+ExecStart=/opt/src/main
 Restart=always
 
 [Install]
