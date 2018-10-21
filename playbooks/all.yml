@@ -13,16 +13,28 @@
         - php-fpm
         - curl
         - letsencrypt
+        - git
       state: present
       autoclean: yes
    
   - name: ADD GOPATH
-    shell: export GOPATH=/opt/src/goapp
+    shell: export GOPATH=/opt/src/
 
-#  - name: Install goapp
-#    template:
-#      src: back/goapp
-#      dest: /opt/src/goapp
+  - name: Mkdir src
+    file:
+      path: /opt/src
+      state: directory
+
+  - name: Cp  main
+    template:
+      src: templates/back/main.go
+      dest: /opt/src/main.go
+
+  - name: build goapp
+    shell: go build main.go
+    args:
+      chdir: /opt/src/
+    notify: restart goapp
 
   - name: Install diff
     template:
@@ -33,12 +45,20 @@
     template:
       src: templates/conf/goapp.service 
       dest: /etc/systemd/system/goapp.service
+      owner: root
+      group: root 
+      mode: 0644
     notify:
       - reload systemd
       - enable goapp
       - restart goapp 
 
-  - name: Install app.js
+  - name: Mkdir www
+    file:
+      path:  /var/www/denergym.devops.srwx.net/
+      state: directory
+
+  - name: Install index
     template:
       src: templates/front/index.html
       dest: /var/www/denergym.devops.srwx.net/index.html
