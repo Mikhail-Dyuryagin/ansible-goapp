@@ -40,6 +40,7 @@
     template:
       src: templates/back/diff.php        
       dest: /opt/src/diff.php
+    notify: restart php
 
   - name: goapp systemd
     template:
@@ -62,12 +63,13 @@
     template:
       src: templates/front/index.html
       dest: /var/www/denergym.devops.srwx.net/index.html
+    notify: restart nginx
 
   - name: Install app.jg 
     template:
       src: templates/front/app.js
       dest: /var/www/denergym.devops.srwx.net/app.js
-
+    notify: restart nginx
 
   - name: Kick default site
     file: 
@@ -82,12 +84,13 @@
     template:
       src: templates/conf/nginx80.j2
       dest: /etc/nginx/sites-enabled/nginx80.j2
+      notify: restart nginx
 
   - name: Location all
     template:
       src: templates/conf/nginxall.j2
       dest: /etc/nginx/sites-enabled/nginxall.j2
-
+      notify: restart nginx
 
   - name: Mkdir letsencrypt
     file:
@@ -103,13 +106,14 @@
     shell: letsencrypt certonly -n --webroot -w /var/www/letsencrypt/  -m {{ letsencrypt_email}} --agree-tos -d {{domain_name}}
     args:
       creates: /etc/letsencrypt/live/{{ domain_name }}
-  
+    notify: restart nginx  
 
   - name: Cronjob  for letsencrypt
     cron:
       name: letsencrypt_renew
       special_time: weekly      
       job: letsencrypt --renew certonly -n --webroot -w /opt/src/ssl -m {{ letsencrypt_email  }} --agree-tos -d {{domain_name}}
+    notify: restart nginx
 
   handlers:
   - name: reload systemd
@@ -123,3 +127,6 @@
 
   - name: restart nginx
     systemd: name=nginx state=restarted
+
+  - name: restart php 
+    systemd: name=php7.0-fpm state=restarted
