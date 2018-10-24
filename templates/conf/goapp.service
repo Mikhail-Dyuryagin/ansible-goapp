@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/opt/src/main
+ExecStart=/opt/src/app/main
 Restart=always
 
 [Install]

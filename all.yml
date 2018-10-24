@@ -20,31 +20,42 @@
   - name: ADD GOPATH
     shell: export GOPATH=/opt/src/
 
+######## Create directory
+
   - name: Mkdir src
     file:
-      path: /opt/src
+      path: /opt/{{ item }}
       state: directory
+    with_items:
+      - src
+      - src/ssl
 
-  - name: Cp  main
-    template:
-      src: templates/back/main.go
-      dest: /opt/src/main.go
+  - name: Mkdir www
+    file:
+      path: /var/www/{{ item }}
+      state: directory
+    with_items:
+      - "{{ domain_name }}"
+      - letsencrypt
+
+######## App install
+
+  - name: clone app repo
+    git:
+      repo: 'https://github.com/Mikhail-Dyuryagin/app'
+      dest: /opt/src/app
 
   - name: build goapp
     shell: go build main.go
     args:
-      chdir: /opt/src/
+      chdir: /opt/src/app
     notify: restart goapp
 
-  - name: Install diff
-    template:
-      src: templates/back/diff.php        
-      dest: /opt/src/diff.php
-    notify: restart php
+
 
   - name: goapp systemd
     template:
-      src: templates/conf/goapp.service 
+      src: conf/goapp.service 
       dest: /etc/systemd/system/goapp.service
       owner: root
       group: root 
@@ -54,53 +65,37 @@
       - enable goapp
       - restart goapp 
 
-  - name: Mkdir www
-    file:
-      path:  /var/www/denergym.devops.srwx.net/
-      state: directory
-
+########
   - name: Install index
     template:
-      src: templates/front/index.html
-      dest: /var/www/denergym.devops.srwx.net/index.html
+      src: front/index.html
+      dest: /var/www/{{domain_name}}/index.html
     notify: restart nginx
 
-  - name: Install app.jg 
+  - name: Install app.js 
     template:
-      src: templates/front/app.js
-      dest: /var/www/denergym.devops.srwx.net/app.js
+      src: front/app.js
+      dest: /var/www/{{domain_name}}/app.js
     notify: restart nginx
-
+########
   - name: Kick default site
     file: 
       path: /etc/nginx/sites-enabled/default
       state: absent 
 
 
-  - name: create letsencrypt dir
-    file: name=/opt/src/ssl state=directory
-
   - name: Location 80
     template:
-      src: templates/conf/nginx80.j2
+      src: conf/nginx80.j2
       dest: /etc/nginx/sites-enabled/nginx80.j2
       notify: restart nginx
 
   - name: Location all
     template:
-      src: templates/conf/nginxall.j2
+      src: conf/nginxall.j2
       dest: /etc/nginx/sites-enabled/nginxall.j2
       notify: restart nginx
 
-  - name: Mkdir letsencrypt
-    file:
-      path: /opt/src/ssl
-      state: directory
-
-  - name: Mkdir acme letsencrypt
-    file:
-      path: /var/www/letsencrypt
-      state: directory
     
   - name: Create cert letsencrypt
     shell: letsencrypt certonly -n --webroot -w /var/www/letsencrypt/  -m {{ letsencrypt_email}} --agree-tos -d {{domain_name}}
