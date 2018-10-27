@@ -1,0 +1,16 @@
+---
+ - name: Mkdir ssl
+   file:
+     path: /opt/{{ item }}
+     state: directory
+   with_items:
+     - src/ssl
+
+ - name: Mkdir www
+   file:
+     path: /var/www/{{ item }}
+     state: directory
+   with_items:
+     - letsencrypt
+
+

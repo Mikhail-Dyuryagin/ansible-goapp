@@ -1,0 +1,11 @@
+---
+- hosts: web
+  remote_user: root
+
+  roles:
+    - goolang
+    - nginx
+    - git
+    - php-fpm
+    - api-sum
+    - api-diff
