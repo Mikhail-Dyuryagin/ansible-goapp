@@ -1,3 +1,4 @@
+
 ---
 ######## Front install
 
@@ -13,7 +14,10 @@
    notify:
      - restart nginx
 
+
  - name: Delete git naher
    file: 
      path=/var/www/{{ domain_name }}/.git
      state=absent
+
+
