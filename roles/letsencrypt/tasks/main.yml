@@ -13,4 +13,22 @@
    with_items:
      - letsencrypt
 
+ - name: Location 80
+   template:
+     src: nginx80.j2
+     dest: /etc/nginx/sites-enabled/nginx80.conf
+   notify: restart nginx
+
+ - name: Create cert letsencrypt
+   shell: letsencrypt certonly -n --webroot -w /var/www/letsencrypt/  -m {{ letsencrypt_email}} --agree-tos -d {{domain_name}}
+   args:
+     creates: /etc/letsencrypt/live/{{ domain_name }}
+   notify: restart nginx  
+
+ - name: Cronjob  for letsencrypt
+   cron:
+     name: letsencrypt_renew
+     special_time: weekly      
+     job: letsencrypt --renew certonly -n --webroot -w /opt/src/ssl -m {{ letsencrypt_email  }} --agree-tos -d {{domain_name}}
+   notify: restart nginx
 

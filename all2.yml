@@ -4,8 +4,11 @@
 
   roles:
     - goolang
-    - nginx
     - git
+    - nginx
     - php-fpm
+    - letsencrypt
+    - web-front
     - api-sum
     - api-diff
+    

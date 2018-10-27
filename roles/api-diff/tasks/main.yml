@@ -1,0 +1,22 @@
+---
+ - name: Mkdir src
+   file:
+     path: /opt/{{ item }}
+     state: directory
+   with_items:
+      - src
+ 
+######## App install
+
+ - name: clone app repo
+   git:
+     repo: 'https://github.com/Mikhail-Dyuryagin/api-diff'
+     dest: /opt/src/api-diff
+   notify: 
+     - restart php
+     - restart nginx
+
+ - name: Delete git naher
+   file: 
+     path=/opt/src/api-diff/.git
+     state=absent

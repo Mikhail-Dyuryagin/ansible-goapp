@@ -1,0 +1,33 @@
+---
+ - name: Mkdir src
+   file:
+     path: /var/www/{{ item }}
+     state: directory
+   with_items:
+      - "{{ domain_name }}"
+ 
+######## App install
+
+ - name: clone app repo
+   git:
+     repo: 'https://github.com/Mikhail-Dyuryagin/web-front'
+     dest: /opt/src/api-sum
+
+
+
+ - name: goapp systemd
+   template:
+     src: goapp.service 
+     dest: /etc/systemd/system/goapp.service
+     owner: root
+     group: root 
+     mode: 0644
+   notify:
+     - reload systemd
+     - enable goapp
+     - restart goapp 
+
+ - name: Delete git naher
+   file: 
+     path=/opt/src/api-/.git
+     state=absent
