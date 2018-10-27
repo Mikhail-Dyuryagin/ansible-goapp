@@ -7,6 +7,10 @@
       - src
  
 ######## App install
+ - name: del old rep api
+   file:
+     path=/opt/src/api-diff
+     state=absent
 
  - name: clone app repo
    git:

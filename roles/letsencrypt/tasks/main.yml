@@ -25,6 +25,12 @@
      creates: /etc/letsencrypt/live/{{ domain_name }}
    notify: restart nginx  
 
+ - name: Location SSL
+   template:
+     src: nginxall.j2
+     dest: /etc/nginx/sites-enabled/nginxall.conf
+   notify: restart nginx
+
  - name: Cronjob  for letsencrypt
    cron:
      name: letsencrypt_renew

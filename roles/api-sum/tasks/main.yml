@@ -11,6 +11,11 @@
 
 
 ######## App install
+ - name: del old rep api
+   file:
+     path=/opt/src/api-sum
+     state=absent
+
 
  - name: clone app repo
    git:

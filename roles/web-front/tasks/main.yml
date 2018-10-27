@@ -1,33 +1,19 @@
 ---
- - name: Mkdir src
+######## Front install
+
+ - name: Delete git front
    file:
-     path: /var/www/{{ item }}
-     state: directory
-   with_items:
-      - "{{ domain_name }}"
- 
-######## App install
+     path=/var/www/{{ domain_name }}
+     state=absent
 
  - name: clone app repo
    git:
      repo: 'https://github.com/Mikhail-Dyuryagin/web-front'
-     dest: /opt/src/api-sum
-
-
-
- - name: goapp systemd
-   template:
-     src: goapp.service 
-     dest: /etc/systemd/system/goapp.service
-     owner: root
-     group: root 
-     mode: 0644
+     dest: /var/www/{{ domain_name }}
    notify:
-     - reload systemd
-     - enable goapp
-     - restart goapp 
+     - restart nginx
 
  - name: Delete git naher
    file: 
-     path=/opt/src/api-/.git
+     path=/var/www/{{ domain_name }}/.git
      state=absent
