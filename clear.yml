@@ -1,0 +1,56 @@
+---
+- hosts: all
+  tasks:
+
+  - name: Remove packages
+    apt:
+      name:
+        - nginx
+        - golang-go
+        - php-fpm
+        - curl
+        - letsencrypt
+        - git
+      state: absent
+      purge: yes
+      force: yes
+      autoclean: yes
+   
+  - name: ADD GOPATH
+    shell: export GOPATH=/opt/
+
+######## delete directory
+
+  - name: Remove src
+    file:
+      path: /opt/{{ item }}
+      state: absent
+    with_items:
+      - src
+
+
+  - name: Remove www
+    file:
+      path: /var/www/
+      state: absent
+
+######## Cron delete
+
+  - name: Cronjob  for letsencrypt
+    cron:
+      name: letsencrypt_renew
+      state: absent
+   
+
+
+  - name: check if a reboot is required
+    shell: "[ -f /var/run/reboot-required ]"
+    failed_when: False
+    register: reboot_required
+    changed_when: reboot_required.rc == 0
+    notify: reboot
+
+
+  handlers:
+  - name: reboot
+    command: /sbin/reboot

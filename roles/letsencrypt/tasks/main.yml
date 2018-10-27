@@ -1,4 +1,11 @@
 ---
+ - name: Install letsencrypt
+   apt:
+     name:
+       - letsencrypt
+     state: present
+     autoclean: yes
+
  - name: Mkdir ssl
    file:
      path: /opt/{{ item }}
@@ -13,12 +20,16 @@
    with_items:
      - letsencrypt
 
+
  - name: Location 80
    template:
      src: nginx80.j2
      dest: /etc/nginx/sites-enabled/nginx80.conf
    notify: restart nginx
-
+ 
+ - name: Force reset nginx  
+   meta: flush_handlers
+ 
  - name: Create cert letsencrypt
    shell: letsencrypt certonly -n --webroot -w /var/www/letsencrypt/  -m {{ letsencrypt_email}} --agree-tos -d {{domain_name}}
    args:

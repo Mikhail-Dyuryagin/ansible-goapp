@@ -3,7 +3,7 @@
    apt: allow_unauthenticated=yes name=nginx state=present
 
  - name: Removing default sites-Available
-   file: path=/etc/nginx/sites-available/default state=absent
+   file: path=/etc/nginx/sites-enabled/default state=absent
    notify: restart nginx
 
  - name: Setting nginx configuration
