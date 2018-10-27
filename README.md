@@ -2,10 +2,14 @@
 ---------------------------------------
 myhost - inventory file
 
-playbooks/all.yml - main file
+pre.yml - pre-insalltion python on host
+
+goapp.yml - main file
+
+
 --------------------------------------------
 
 
 keep calm and push this command:
 
-ansible-playbook -i myhosts playbooks/all.yml
+ansible-playbook -i inventory/myhosts goapp.yml
